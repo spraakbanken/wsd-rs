@@ -1,0 +1,21 @@
+[workspace]
+resolver = "2"
+members = [
+"crates/saldo", 
+"crates/saldowsd", 
+#"crates/wsd-application",
+]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2021"
+
+[workspace.dependencies]
+# local crates
+saldo = { path = "crates/saldo" }
+
+# external crates
+log = "0.4.22"
+miette = "7.4.0"
+quick-xml = "0.37.0"
+thiserror = "2.0.4"
