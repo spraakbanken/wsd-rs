@@ -4,6 +4,7 @@ use hashbrown::{HashMap, HashSet};
 
 use crate::{
     saldo_entry::{SaldoEntry, SaldoEntryBuilder, SaldoId},
+    saldo_lemgram::{SaldoLemgram, SaldoLemgramId},
     shared::xml_reader::{AttributeMap, ContentHandler},
 };
 
@@ -19,6 +20,8 @@ pub struct SaldoParserCallback {
     pub entries: HashMap<SaldoId, SaldoEntry>,
     pub mfids: HashMap<SaldoId, String>,
     pub pfids: HashMap<SaldoId, HashSet<String>>,
+    pub lemgrams: HashMap<SaldoLemgramId, SaldoLemgram>,
+    pub lemgrams_by_lemma: HashMap<String, SaldoLemgramId>,
 }
 
 impl SaldoParserCallback {
@@ -114,6 +117,42 @@ impl ContentHandler for SaldoParserCallback {
                             self.entries.insert(entry_id, entry);
                         }
                         Err(err) => todo!("handle error={:?}", err),
+                    }
+                }
+            }
+            b"FormRepresentation" => {
+                let Some(lemgram_id) = self.curr_lemgram_id.take() else {
+                    todo!("missing lemgram_id");
+                };
+                let lemgram_id = SaldoLemgramId::new(lemgram_id);
+                let Some(curr_pos) = self.curr_pos.take() else {
+                    todo!("missing pos");
+                };
+                if let Some(curr_entry) = self.curr_entry.as_mut() {
+                    if let Some(sl) = self.lemgrams.get_mut(&lemgram_id) {
+                        if sl.pos() != curr_pos {
+                            todo!("incompatible POS tags");
+                        }
+                        curr_entry.add_lemgram(&lemgram_id);
+                        if let Some(curr_entry_id) = curr_entry.get_id() {
+                            sl.add_entry(curr_entry_id);
+                        }
+                    } else {
+                        let Some(wf) = self.curr_wf.take() else {
+                            todo!("no wf: {}", lemgram_id);
+                        };
+                        let mut sl = SaldoLemgram::new(
+                            lemgram_id.clone(),
+                            curr_pos,
+                            self.curr_para.take(),
+                            wf.clone(),
+                        );
+                        if let Some(curr_entry_id) = curr_entry.get_id() {
+                            sl.add_entry(curr_entry_id);
+                        }
+                        self.lemgrams.insert(lemgram_id.clone(), sl);
+                        curr_entry.add_lemgram(&lemgram_id);
+                        self.lemgrams_by_lemma.insert(wf, lemgram_id);
                     }
                 }
             }

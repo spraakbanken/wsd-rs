@@ -1,5 +1,7 @@
 use std::{borrow::Borrow, fmt};
 
+use crate::saldo_lemgram::SaldoLemgramId;
+
 #[derive(Debug, Clone, Hash, PartialEq, Eq, PartialOrd, Ord)]
 pub struct SaldoId(String);
 
@@ -32,21 +34,24 @@ pub struct SaldoEntry {
     pf: Vec<SaldoId>,
     inv_pf: Vec<SaldoId>,
     inv_mf: Vec<SaldoId>,
+    lemgrams: Vec<SaldoLemgramId>,
 }
 
 #[derive(Debug, Default, Clone, Hash, PartialEq, Eq)]
 pub struct SaldoEntryBuilder {
     id: Option<SaldoId>,
+    lemgrams: Vec<SaldoLemgramId>,
 }
 
 impl SaldoEntry {
-    pub fn new(id: SaldoId) -> SaldoEntry {
+    pub fn new(id: SaldoId, lemgrams: Vec<SaldoLemgramId>) -> SaldoEntry {
         Self {
             id,
             mf: None,
             pf: Vec::new(),
             inv_pf: Vec::new(),
             inv_mf: Vec::new(),
+            lemgrams,
         }
     }
     pub fn get_id(&self) -> &SaldoId {
@@ -73,14 +78,15 @@ impl SaldoEntryBuilder {
     pub fn set_id(&mut self, id: SaldoId) {
         self.id = Some(id);
     }
-    pub fn set_id_opt(&mut self, id_opt: Option<SaldoId>) {
-        self.id = id_opt;
+
+    pub fn add_lemgram(&mut self, lemgram_id: &SaldoLemgramId) {
+        self.lemgrams.push(lemgram_id.clone());
     }
     pub fn build(self) -> Result<SaldoEntry, String> {
-        let Self { id } = self;
+        let Self { id, lemgrams } = self;
         let Some(id) = id else {
             return Err("missing id".into());
         };
-        Ok(SaldoEntry::new(id))
+        Ok(SaldoEntry::new(id, lemgrams))
     }
 }

@@ -30,14 +30,17 @@ pub enum SaldoLexiconError {
     FailedToOpenFile { path: PathBuf, source: io::Error },
 }
 impl SaldoLexicon {
-    pub fn new(filename: &Path) -> Result<Self, SaldoLexiconError> {
+    pub fn new(filename: impl AsRef<Path>) -> Result<Self, SaldoLexiconError> {
         log::debug!("Reading dictionary ...");
         let file =
-            fs::File::open(filename).map_err(|source| SaldoLexiconError::FailedToOpenFile {
-                path: filename.into(),
+            fs::File::open(&filename).map_err(|source| SaldoLexiconError::FailedToOpenFile {
+                path: filename.as_ref().into(),
                 source,
             })?;
-        let file_ext = filename.extension().map(|ext| ext.to_string_lossy());
+        let file_ext = filename
+            .as_ref()
+            .extension()
+            .map(|ext| ext.to_string_lossy());
         dbg!(&file_ext);
         let reader = if file_ext.as_deref() == Some("gz") {
             log::debug!("reading gzip file");
