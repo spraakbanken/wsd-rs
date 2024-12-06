@@ -4,7 +4,7 @@ members = [
     "crates/process-corpus",
     "crates/saldo",
     "crates/saldowsd",
-    #"crates/wsd-application",
+    "crates/wsd-application",
 ]
 
 [workspace.package]
@@ -15,8 +15,10 @@ edition = "2021"
 # local crates
 saldo = { path = "crates/saldo" }
 process-corpus = { path = "crates/process-corpus" }
+wsd-application = { path = "crates/wsd-application" }
 
 # external crates
+hashbrown = "0.15.2"
 log = "0.4.22"
 miette = "7.4.0"
 quick-xml = "0.37.0"
