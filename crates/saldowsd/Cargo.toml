@@ -4,8 +4,10 @@ version.workspace = true
 edition.workspace = true
 
 [dependencies]
+# local deps
+saldo = { workspace = true }
 env_logger = "0.11.5"
+hashbrown.workspace = true
 log.workspace = true
 miette = { workspace = true, features = ["fancy"] }
-saldo.workspace = true
 thiserror.workspace = true

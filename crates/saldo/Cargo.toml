@@ -4,10 +4,9 @@ version.workspace = true
 edition.workspace = true
 
 [dependencies]
-dashmap = "6.1.0"
 flate2 = "1.0.35"
-hashbrown = "0.15.2"
+hashbrown.workspace = true
 log = { workspace = true }
-miette = "7.4.0"
+miette.workspace = true
 quick-xml = { workspace = true }
-thiserror = "2.0.4"
+thiserror.workspace = true
