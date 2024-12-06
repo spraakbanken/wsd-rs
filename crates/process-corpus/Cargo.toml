@@ -1,0 +1,6 @@
+[package]
+name = "process-corpus"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]

@@ -1,6 +1,7 @@
 [workspace]
 resolver = "2"
 members = [
+    "crates/process-corpus",
     "crates/saldo",
     "crates/saldowsd",
     #"crates/wsd-application",
@@ -13,6 +14,7 @@ edition = "2021"
 [workspace.dependencies]
 # local crates
 saldo = { path = "crates/saldo" }
+process-corpus = { path = "crates/process-corpus" }
 
 # external crates
 log = "0.4.22"
