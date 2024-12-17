@@ -7,11 +7,16 @@ edition.workspace = true
 # local deps
 process-corpus = { workspace = true }
 saldo = { workspace = true }
+w2v = { workspace = true }
 
 # external deps
-finalfusion = "0.18.0"
 hashbrown.workspace = true
 log.workspace = true
 miette.workspace = true
 thiserror.workspace = true
-ndarray = "0.15"
+ndarray.workspace = true
+
+[dev-dependencies]
+eyre.workspace = true
+insta.workspace = true
+rstest.workspace = true

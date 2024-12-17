@@ -14,12 +14,12 @@ impl LemmaToken {
         let xs: Vec<&str> = line.split('\t').collect();
         let mut out = Self::default();
         if xs[4] != "_" {
-            for s in xs[4].split("\\|") {
+            for s in xs[4].split("|") {
                 out.possible_lemmas.push(s.to_string());
             }
         }
         if xs[5] != "_" {
-            for s in xs[5].split("\\|") {
+            for s in xs[5].split("|") {
                 out.possible_senses.push(s.to_string());
             }
         }

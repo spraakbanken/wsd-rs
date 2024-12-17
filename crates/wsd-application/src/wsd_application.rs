@@ -1,8 +1,9 @@
 use std::io;
 
-use ::process_corpus::LemmaToken;
-use process_corpus::process_corpus;
+use process_corpus::{self, LemmaToken};
 use saldo::SaldoLexicon;
+
+use crate::SourceFormat;
 
 pub trait WSDApplication {
     fn disambiguate_text(
@@ -55,4 +56,88 @@ pub fn read_sentences(
         }
     }
     Ok(out)
+}
+
+#[derive(Debug, Copy, Clone)]
+pub struct DisambiguateOptions {
+    pub batch_size: usize,
+    pub max_sen: usize,
+}
+
+impl Default for DisambiguateOptions {
+    fn default() -> Self {
+        Self {
+            batch_size: 1,
+            max_sen: u32::MAX as usize,
+        }
+    }
+}
+pub fn disambiguate_sentences(
+    wsd: SharedWSDApplication,
+    reader: &mut dyn io::BufRead,
+    out: &mut dyn io::Write,
+    f: &dyn SourceFormat,
+    DisambiguateOptions {
+        batch_size,
+        max_sen,
+    }: DisambiguateOptions,
+) -> io::Result<()> {
+    let mut total_sentences = 0;
+    let mut next_print = 100000;
+
+    loop {
+        let text = f.read_sentences(
+            reader,
+            // saldo.as_ref(),
+            // args.sbxml,
+            batch_size,
+            // args.split_mwes,
+            // args.split_compounds,
+        )?;
+        // log::trace!(&text);
+        if text.len() == 0 {
+            break;
+        }
+        total_sentences += text.len();
+        if total_sentences > next_print {
+            log::info!("{}", next_print);
+            next_print += 100000;
+        }
+
+        // if !args.for_lemma.is_none() {
+        //     todo!("forLemma not supported yet");
+        // } else {
+        let result = wsd.disambiguate_text(text);
+        for p in result {
+            for i in 0..p.0.len() {
+                write!(out, "{}\t", &p.0[i])?;
+                match &p.1[i] {
+                    None => writeln!(out, "_")?,
+                    Some(scores) => writeln!(out, "{}", join_to_string(scores))?,
+                }
+            }
+            writeln!(out,)?;
+        }
+
+        if total_sentences >= max_sen {
+            break;
+        }
+    }
+    // }
+
+    // if !args.for_lemma.is_none() {
+    //     todo!("printRatios(ratios)");
+    // }
+    Ok(())
+}
+fn join_to_string(vs: &[f32]) -> String {
+    if vs.is_empty() {
+        return String::new();
+    }
+    let mut out = String::with_capacity(vs.len() * 2);
+    out.push_str(&vs[0].to_string());
+    for v in &vs[1..] {
+        out.push_str(&format!("|{}", v));
+    }
+    out
 }

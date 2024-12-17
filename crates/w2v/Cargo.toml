@@ -1,0 +1,8 @@
+[package]
+name = "w2v"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+hashbrown.workspace = true
+ndarray.workspace = true

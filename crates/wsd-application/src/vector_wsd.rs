@@ -1,9 +1,6 @@
-use std::{fs, io};
-
-use finalfusion::{
-    embeddings::Embeddings, prelude::ReadWord2Vec, storage::NdArray, vocab::SimpleVocab,
-};
-use ndarray::s;
+use hashbrown::HashMap;
+use ndarray::{s, Array1};
+use w2v::word2vec2;
 
 use crate::{UsageError, WSDApplication};
 
@@ -11,8 +8,8 @@ pub struct VectorWSD {
     decay: bool,
     s1prior: f32,
     context_width: usize,
-    id_to_vectors: Embeddings<SimpleVocab, NdArray>,
-    form_to_ctx_vec: Embeddings<SimpleVocab, NdArray>,
+    id_to_vectors: HashMap<String, Array1<f32>>,
+    form_to_ctx_vec: HashMap<String, Array1<f32>>,
 }
 
 impl VectorWSD {
@@ -59,10 +56,10 @@ impl VectorWSD {
         }))
     }
 
-    fn add_s1prior(&self, ps: &[String], out: &mut [f32], seen: &[bool]) {
+    fn add_s1prior(&self, ps: &[String], out: &mut [f32], svs: &[Option<&Array1<f32>>]) {
         let mut min = i32::MAX;
         for i in 0..out.len() {
-            if !seen[i] {
+            if svs[i].is_none() {
                 continue;
             }
             let s = &ps[i];
@@ -73,7 +70,7 @@ impl VectorWSD {
             }
         }
         for i in 0..out.len() {
-            if !seen[i] {
+            if svs[i].is_none() {
                 continue;
             }
             let s = &ps[i];
@@ -90,19 +87,29 @@ impl WSDApplication for VectorWSD {
     fn disambiguate(&self, lts: &[process_corpus::LemmaToken], i: usize) -> Option<Vec<f32>> {
         let len = lts.len();
         let li = &lts[i];
+        log::trace!("Lemma token {}: {:?}", i, li);
         let mut out = vec![0f32; li.possible_senses().len()];
         if out.len() < 2 {
+            log::trace!("out shorter than 2, returning None, out={:?}", out);
             return None;
         }
         // let mut svs = vec![vec![]; out.len()];
-        let (svs, seen) = self.id_to_vectors.embedding_batch(li.possible_senses());
-        // for (j, poss_sense) in li.possible_senses().iter().enumerate() {
-        //     svs[j] = self.id_to_vectors.embedding(&poss_sense);
-        // }
-        if !seen.iter().any(|x| *x) {
+        let mut svs = Vec::with_capacity(out.len());
+        let mut seen_any = false;
+        // let (svs, seen) = self.id_to_vectors.embedding_batch(li.possible_senses());
+        for poss_sense in li.possible_senses() {
+            let v = self.id_to_vectors.get(poss_sense);
+            if v.is_some() {
+                seen_any = true;
+            }
+            svs.push(v);
+            //     svs[j] = self.id_to_vectors.embedding(&poss_sense);
+        }
+        if !seen_any {
+            log::trace!("Did not found any embeddings for the possible senses. ");
             return None;
         }
-        self.add_s1prior(li.possible_senses(), &mut out, &seen);
+        self.add_s1prior(li.possible_senses(), &mut out, &svs);
 
         let start = 0.max(i - self.context_width);
         let end = (len - 1).min(i + self.context_width);
@@ -113,7 +120,7 @@ impl WSDApplication for VectorWSD {
             let Some(l) = lts[k].possible_lemmas().get(0) else {
                 continue;
             };
-            let Some(cv) = self.form_to_ctx_vec.embedding(l) else {
+            let Some(cv) = self.form_to_ctx_vec.get(l) else {
                 continue;
             };
 
@@ -126,22 +133,22 @@ impl WSDApplication for VectorWSD {
             };
 
             for j in 0..out.len() {
-                if !seen[j] {
+                let Some(vs) = svs[j] else {
                     continue;
-                }
-                let sc = svs.slice(s![j, ..]).dot(&cv);
+                };
+                let sc = vs.dot(cv);
                 out[j] += weight * sc;
             }
         }
-        normalize_to_probs(&mut out, &seen);
+        normalize_to_probs(&mut out, &svs);
         Some(out)
     }
 }
 
-fn normalize_to_probs(out: &mut [f32], seen: &[bool]) {
+fn normalize_to_probs(out: &mut [f32], svs: &[Option<&Array1<f32>>]) {
     let mut m = f32::NEG_INFINITY;
     for i in 0..out.len() {
-        if !seen[i] {
+        if svs[i].is_none() {
             out[i] = 0f32;
         } else if out[i] > m {
             m = out[i];
@@ -152,42 +159,35 @@ fn normalize_to_probs(out: &mut [f32], seen: &[bool]) {
     }
     let mut exp_sum = 0f32;
     for i in 0..out.len() {
-        if seen[i] {
+        if !svs[i].is_none() {
             exp_sum += (out[i] - m).exp();
         }
     }
     let log_exp_sum = exp_sum.ln() + m;
     for i in 0..out.len() {
-        if seen[i] {
+        if !svs[i].is_none() {
             out[i] = (out[i] - log_exp_sum).exp();
         }
     }
 }
 
-fn read_sense_vectors(path: &str) -> Result<Embeddings<SimpleVocab, NdArray>, UsageError> {
+fn read_sense_vectors(path: &str) -> Result<HashMap<String, Array1<f32>>, UsageError> {
     log::info!("Reading sense vectors...");
     read_embeddings_from_path(path)
 }
 
-fn read_ctx_vectors(path: &str) -> Result<Embeddings<SimpleVocab, NdArray>, UsageError> {
+fn read_ctx_vectors(path: &str) -> Result<HashMap<String, Array1<f32>>, UsageError> {
     log::info!("Reading context vectors...");
     read_embeddings_from_path(path)
 }
 
-fn read_embeddings_from_path(path: &str) -> Result<Embeddings<SimpleVocab, NdArray>, UsageError> {
-    let mut reader =
-        io::BufReader::new(fs::File::open(path).map_err(|source| UsageError::IoError {
+fn read_embeddings_from_path(path: &str) -> Result<HashMap<String, Array1<f32>>, UsageError> {
+    let embeddings =
+        word2vec2::read_w2v_file(path, false).map_err(|source| UsageError::Word2VecError {
             param: String::new(),
             path: path.to_string(),
             source,
-        })?);
-    let embeddings = Embeddings::read_word2vec_binary(&mut reader).map_err(|source| {
-        UsageError::Word2VecError {
-            param: String::new(),
-            path: path.to_string(),
-            source,
-        }
-    })?;
+        })?;
 
     Ok(embeddings)
 }

@@ -6,7 +6,8 @@ use options::Args;
 use saldo::SaldoLexicon;
 use wsd_application::{
     make_wsd_application,
-    wsd_application::{evaluate, read_sentences},
+    wsd_application::{disambiguate_sentences, evaluate, DisambiguateOptions},
+    SourceFormat, TabFormat,
 };
 
 mod options;
@@ -34,52 +35,28 @@ fn main() -> miette::Result<()> {
 
     // let mut ratios = None;
     if !args.for_lemma.is_none() {
-        todo!("ratios = Some(HashMap::new())");
+        todo!("ratios is not yet supported");
+        // todo!("ratios = Some(HashMap::new())");
     }
-    let mut total_sentences = 0;
-    let mut next_print = 100000;
 
     let mut stdin = io::stdin().lock();
-
-    loop {
-        let text = read_sentences(
-            &mut stdin,
-            saldo.as_ref(),
-            args.sbxml,
-            args.batch_size,
-            args.split_mwes,
-            args.split_compounds,
-        )
-        .into_diagnostic()?;
-        if text.len() == 0 {
-            break;
-        }
-        total_sentences += text.len();
-        if total_sentences > next_print {
-            log::info!("{}", next_print);
-            next_print += 100000;
-        }
-
-        if !args.for_lemma.is_none() {
-            todo!("forLemma not supported yet");
-        } else {
-            let result = wsd.disambiguate_text(text);
-            for p in result {
-                for i in 0..p.0.len() {
-                    print!("{}\t", &p.0[i]);
-                    match &p.1[i] {
-                        None => println!("_"),
-                        Some(scores) => println!("{}", join_to_string(scores)),
-                    }
-                }
-                println!();
-            }
-
-            if total_sentences >= args.max_sen {
-                break;
-            }
-        }
-    }
+    let mut stdout = io::stdout().lock();
+    let format: Box<dyn SourceFormat> = if args.sbxml {
+        todo!("sbxml format is not yet supported");
+    } else {
+        Box::new(TabFormat::default())
+    };
+    disambiguate_sentences(
+        wsd,
+        &mut stdin,
+        &mut stdout,
+        &format,
+        DisambiguateOptions {
+            batch_size: args.batch_size,
+            max_sen: args.max_sen,
+        },
+    )
+    .into_diagnostic()?;
 
     if !args.for_lemma.is_none() {
         todo!("printRatios(ratios)");
@@ -94,17 +71,6 @@ fn usage() {
     eprintln!("");
 }
 
-fn join_to_string(vs: &[f32]) -> String {
-    if vs.is_empty() {
-        return String::new();
-    }
-    let mut out = String::with_capacity(vs.len() * 2);
-    out.push_str(&vs[0].to_string());
-    for v in &vs[1..] {
-        out.push_str(&format!("|{}", v));
-    }
-    out
-}
 fn configure_logging(level: u8) {
     let log_level = match level {
         0 => LevelFilter::Error,

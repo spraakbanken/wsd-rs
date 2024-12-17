@@ -2,9 +2,11 @@ use std::io;
 
 use saldo::SaldoLexicon;
 
+mod source_format;
 mod vector_wsd;
 pub mod wsd_application;
 
+pub use self::source_format::{SourceFormat, TabFormat};
 use vector_wsd::VectorWSD;
 pub use wsd_application::{SharedWSDApplication, WSDApplication};
 
@@ -50,7 +52,7 @@ pub enum UsageError {
     Word2VecError {
         param: String,
         path: String,
-        source: finalfusion::error::Error,
+        source: io::Error,
     },
 }
 

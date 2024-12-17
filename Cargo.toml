@@ -4,6 +4,7 @@ members = [
     "crates/process-corpus",
     "crates/saldo",
     "crates/saldowsd",
+    "crates/w2v",
     "crates/wsd-application",
 ]
 
@@ -15,11 +16,16 @@ edition = "2021"
 # local crates
 saldo = { path = "crates/saldo" }
 process-corpus = { path = "crates/process-corpus" }
+w2v = { path = "crates/w2v" }
 wsd-application = { path = "crates/wsd-application" }
 
 # external crates
+eyre = "0.6.12"
 hashbrown = "0.15.2"
+insta = "1.41.1"
 log = "0.4.22"
 miette = "7.4.0"
+ndarray = "0.16.1"
 quick-xml = "0.37.0"
+rstest = "0.23.0"
 thiserror = "2.0.4"

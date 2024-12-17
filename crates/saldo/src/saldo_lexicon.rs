@@ -41,7 +41,7 @@ impl SaldoLexicon {
             .as_ref()
             .extension()
             .map(|ext| ext.to_string_lossy());
-        dbg!(&file_ext);
+        log::trace!("File extension: '{:?}'", &file_ext);
         let reader = if file_ext.as_deref() == Some("gz") {
             log::debug!("reading gzip file");
             let decoder = Box::new(flate2::read::GzDecoder::new(file)) as Box<dyn io::Read>;

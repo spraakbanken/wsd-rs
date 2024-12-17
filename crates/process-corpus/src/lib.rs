@@ -1,4 +1,5 @@
 mod lemma_token;
-pub mod process_corpus;
+mod process_corpus;
 
-pub use lemma_token::LemmaToken;
+pub use self::lemma_token::LemmaToken;
+pub use process_corpus::read_lemma_tokens;
