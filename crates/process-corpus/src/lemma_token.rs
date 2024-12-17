@@ -70,9 +70,9 @@ impl fmt::Display for LemmaToken {
         }
 
         if self.possible_senses.len() > 0 {
-            f.write_fmt(format_args!("{}\t", self.possible_senses.join("|")))?;
+            f.write_fmt(format_args!("{}", self.possible_senses.join("|")))?;
         } else {
-            f.write_str("_\t")?;
+            f.write_str("_")?;
         }
         Ok(())
     }
