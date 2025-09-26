@@ -1,5 +1,5 @@
 use hashbrown::HashMap;
-use ndarray::{s, Array1};
+use ndarray::Array1;
 use w2v::word2vec2;
 
 use crate::{UsageError, WSDApplication};
@@ -13,7 +13,9 @@ pub struct VectorWSD {
 }
 
 impl VectorWSD {
-    pub fn new(argv: &[String]) -> Result<crate::SharedWSDApplication, crate::UsageError> {
+    pub fn new_as_shared(
+        argv: &[String],
+    ) -> Result<crate::SharedWSDApplication, crate::UsageError> {
         let mut decay = bool::default();
         let mut s1prior = f32::default();
         let mut context_width = usize::default();
@@ -117,7 +119,7 @@ impl WSDApplication for VectorWSD {
             if k == i {
                 continue;
             }
-            let Some(l) = lts[k].possible_lemmas().get(0) else {
+            let Some(l) = lts[k].possible_lemmas().first() else {
                 continue;
             };
             let Some(cv) = self.form_to_ctx_vec.get(l) else {
@@ -159,13 +161,13 @@ fn normalize_to_probs(out: &mut [f32], svs: &[Option<&Array1<f32>>]) {
     }
     let mut exp_sum = 0f32;
     for i in 0..out.len() {
-        if !svs[i].is_none() {
+        if svs[i].is_some() {
             exp_sum += (out[i] - m).exp();
         }
     }
     let log_exp_sum = exp_sum.ln() + m;
     for i in 0..out.len() {
-        if !svs[i].is_none() {
+        if svs[i].is_some() {
             out[i] = (out[i] - log_exp_sum).exp();
         }
     }

@@ -16,7 +16,7 @@ pub fn make_wsd_application(
     argv: &[String],
 ) -> Result<SharedWSDApplication, WSDError> {
     let res = match cls_name {
-        "se.gu.spraakbanken.wsd.VectorWSD" | "VectorWSD" => VectorWSD::new(argv),
+        "se.gu.spraakbanken.wsd.VectorWSD" | "VectorWSD" => VectorWSD::new_as_shared(argv),
         _ => return Err(WSDError::UnknownWSDName(cls_name.to_string())),
     };
     res.map_err(|error| WSDError::UsageError {

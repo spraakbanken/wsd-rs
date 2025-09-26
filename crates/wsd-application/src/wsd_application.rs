@@ -10,7 +10,7 @@ pub trait WSDApplication {
         &self,
         text: Vec<Vec<LemmaToken>>,
     ) -> Vec<(Vec<LemmaToken>, Vec<Option<Vec<f32>>>)> {
-        let mut out = Vec::new();
+        let mut out = Vec::with_capacity(text.len());
         for sen in text {
             out.push(self.disambiguate_sentence(sen));
         }
@@ -20,7 +20,7 @@ pub trait WSDApplication {
         &self,
         lts: Vec<LemmaToken>,
     ) -> (Vec<LemmaToken>, Vec<Option<Vec<f32>>>) {
-        let mut disamb = Vec::new();
+        let mut disamb = Vec::with_capacity(lts.len());
         for i in 0..lts.len() {
             disamb.push(self.disambiguate(&lts, i));
         }
@@ -95,7 +95,7 @@ pub fn disambiguate_sentences(
             // args.split_compounds,
         )?;
         // log::trace!(&text);
-        if text.len() == 0 {
+        if text.is_empty() {
             break;
         }
         total_sentences += text.len();

@@ -63,13 +63,13 @@ impl fmt::Display for LemmaToken {
         f.write_str("_\t")?;
         // }
 
-        if self.possible_lemmas.len() > 0 {
+        if !self.possible_lemmas.is_empty() {
             f.write_fmt(format_args!("{}\t", self.possible_lemmas.join("|")))?;
         } else {
             f.write_str("_\t")?;
         }
 
-        if self.possible_senses.len() > 0 {
+        if !self.possible_senses.is_empty() {
             f.write_fmt(format_args!("{}", self.possible_senses.join("|")))?;
         } else {
             f.write_str("_")?;

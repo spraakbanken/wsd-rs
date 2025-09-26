@@ -20,7 +20,7 @@ pub fn read_lemma_tokens(reader: &mut dyn io::BufRead) -> io::Result<Option<Vec<
         if line_trimmed.is_empty() {
             return Ok(Some(out));
         }
-        let clean_line = clean_input(&line_trimmed);
+        let clean_line = clean_input(line_trimmed);
         out.push(LemmaToken::parse_line(&clean_line));
     }
 }
@@ -28,6 +28,6 @@ pub fn read_lemma_tokens(reader: &mut dyn io::BufRead) -> io::Result<Option<Vec<
 fn clean_input(s: &str) -> String {
     let out = s.replace(r"\xc3\xa5", "å");
     let out = out.replace(r"\xc3\xa4", "ä");
-    let out = out.replace(r"\xc3\xb6", "ö");
-    out
+
+    out.replace(r"\xc3\xb6", "ö")
 }

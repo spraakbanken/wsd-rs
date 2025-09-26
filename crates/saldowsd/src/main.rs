@@ -14,9 +14,8 @@ mod options;
 
 fn main() -> miette::Result<()> {
     let argv: Vec<String> = std::env::args().collect();
-    let args = Args::parse(&argv).map_err(|err| {
+    let args = Args::parse(&argv).inspect_err(|_err| {
         usage();
-        err
     })?;
 
     configure_logging(args.verbose);
@@ -34,7 +33,7 @@ fn main() -> miette::Result<()> {
     }
 
     // let mut ratios = None;
-    if !args.for_lemma.is_none() {
+    if args.for_lemma.is_some() {
         todo!("ratios is not yet supported");
         // todo!("ratios = Some(HashMap::new())");
     }
@@ -58,7 +57,7 @@ fn main() -> miette::Result<()> {
     )
     .into_diagnostic()?;
 
-    if !args.for_lemma.is_none() {
+    if args.for_lemma.is_some() {
         todo!("printRatios(ratios)");
     }
 
@@ -68,7 +67,7 @@ fn main() -> miette::Result<()> {
 
 fn usage() {
     eprintln!("Usage: saldowsd -appName=APP_NAME [-saldo=SALDO]");
-    eprintln!("");
+    eprintln!();
 }
 
 fn configure_logging(level: u8) {

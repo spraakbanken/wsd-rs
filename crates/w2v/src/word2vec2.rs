@@ -77,7 +77,7 @@ pub fn read_w2v_file(path: &str, normalize: bool) -> io::Result<HashMap<String, 
 }
 
 fn bytes_to_float(buf: &[u8], pos: usize) -> f32 {
-    let b0 = (buf[pos + 0] as u32) & 255;
+    let b0 = (buf[pos] as u32) & 255;
     let b1 = (buf[pos + 1] as u32) & 255;
     let b2 = (buf[pos + 2] as u32) & 255;
     let b3 = (buf[pos + 3] as u32) & 255;

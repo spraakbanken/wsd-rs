@@ -1,6 +1,7 @@
 use wsd_application::UsageError;
 
 #[derive(Debug)]
+#[allow(dead_code)]
 pub struct Args {
     /// load saldo from this file
     pub saldo: Option<String>,
