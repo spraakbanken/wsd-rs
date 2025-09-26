@@ -3,9 +3,8 @@ use std::{fs, io};
 use rstest::{fixture, rstest};
 
 use wsd_application::{
-    make_wsd_application,
-    wsd_application::{disambiguate_sentences, DisambiguateOptions},
-    SharedWSDApplication, TabFormat,
+    SharedWSDApplication, TabFormat, make_wsd_application,
+    wsd_application::{DisambiguateOptions, disambiguate_sentences},
 };
 
 #[fixture]

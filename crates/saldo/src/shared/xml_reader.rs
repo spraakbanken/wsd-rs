@@ -1,6 +1,6 @@
 use std::{borrow::Cow, collections::BTreeMap, io::BufRead};
 
-use quick_xml::events::{attributes::Attributes, Event};
+use quick_xml::events::{Event, attributes::Attributes};
 
 pub struct XmlReader<R, C> {
     reader: quick_xml::NsReader<R>,

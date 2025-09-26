@@ -5,9 +5,8 @@ use miette::IntoDiagnostic;
 use options::Args;
 use saldo::SaldoLexicon;
 use wsd_application::{
-    make_wsd_application,
-    wsd_application::{disambiguate_sentences, evaluate, DisambiguateOptions},
-    SourceFormat, TabFormat,
+    SourceFormat, TabFormat, make_wsd_application,
+    wsd_application::{DisambiguateOptions, disambiguate_sentences, evaluate},
 };
 
 mod options;
