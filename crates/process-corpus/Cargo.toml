@@ -2,6 +2,7 @@
 name = "process-corpus"
 version.workspace = true
 edition.workspace = true
+rust-version.workspace = true
 
 [dependencies]
 log.workspace = true
