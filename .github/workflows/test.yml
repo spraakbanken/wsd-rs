@@ -30,6 +30,7 @@ jobs:
         with:
           submodules: true
           persist-credentials: false
+          lfs: true
       - name: Install ${{ matrix.toolchain }}
         uses: dtolnay/rust-toolchain@6d653acede28d24f02e3cd41383119e8b1b35921 # master
         with:
@@ -38,10 +39,9 @@ jobs:
         # enable this ci template to run regardless of whether the lockfile is checked in or not
         if: hashFiles('Cargo.lock') == ''
         run: cargo generate-lockfile
+
       - name: ls files
         run: |
-          ls -l assets/sparv-wsd/
-          ls -l assets/sparv-wsd/models
           ls -l assets/sparv-wsd/models/scouse
       # https://twitter.com/jonhoo/status/1571290371124260865
       - name: cargo test --locked
@@ -79,6 +79,7 @@ jobs:
         with:
           submodules: true
           persist-credentials: false
+          lfs: true
       - name: Install stable
         uses: dtolnay/rust-toolchain@6d653acede28d24f02e3cd41383119e8b1b35921 # master
         with:
@@ -91,6 +92,7 @@ jobs:
         run: rustup default stable
       - name: cargo update -Zminimal-versions
         run: cargo +nightly update -Zdirect-minimal-versions
+
       - name: cargo test
         run: cargo test --locked --all-features --all-targets
   os-check:
@@ -112,6 +114,7 @@ jobs:
         with:
           submodules: true
           persist-credentials: false
+          lfs: true
       - name: Install stable
         uses: dtolnay/rust-toolchain@6d653acede28d24f02e3cd41383119e8b1b35921 # master
         with:
@@ -119,6 +122,7 @@ jobs:
       - name: cargo generate-lockfile
         if: hashFiles('Cargo.lock') == ''
         run: cargo generate-lockfile
+
       - name: cargo test
         run: cargo test --locked --all-features --all-targets
   coverage:
@@ -150,6 +154,7 @@ jobs:
         with:
           submodules: true
           persist-credentials: false
+          lfs: true
       - name: Install stable
         uses: dtolnay/rust-toolchain@6d653acede28d24f02e3cd41383119e8b1b35921 # master
         with:
@@ -162,6 +167,7 @@ jobs:
       - name: cargo generate-lockfile
         if: hashFiles('Cargo.lock') == ''
         run: cargo generate-lockfile
+
       - name: cargo llvm-cov
         run: cargo llvm-cov --locked --all-features --lcov --output-path lcov.info
       - name: Record Rust version

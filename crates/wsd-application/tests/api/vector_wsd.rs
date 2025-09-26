@@ -1,4 +1,4 @@
-use std::{fs, io};
+use std::{env, fs, io};
 
 use rstest::{fixture, rstest};
 
@@ -18,6 +18,8 @@ fn context_model() -> &'static str {
 }
 #[fixture]
 fn vector_wsd(sense_model: &str, context_model: &str) -> SharedWSDApplication {
+    println!("sense_model='{}'", sense_model);
+    println!("context_model='{}'", context_model);
     let argv = &[
         // "-format=tab".to_string(),
         format!("-svFile={}", sense_model),
