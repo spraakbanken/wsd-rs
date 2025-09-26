@@ -38,6 +38,11 @@ jobs:
         # enable this ci template to run regardless of whether the lockfile is checked in or not
         if: hashFiles('Cargo.lock') == ''
         run: cargo generate-lockfile
+      - name: ls files
+        run: |
+          ls -l assets/sparv-wsd/
+          ls -l assets/sparv-wsd/models
+          ls -l assets/sparv-wsd/models/scouse
       # https://twitter.com/jonhoo/status/1571290371124260865
       - name: cargo test --locked
         run: cargo test --locked --all-features --all-targets
