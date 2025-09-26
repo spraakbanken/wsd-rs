@@ -2,9 +2,10 @@
 name = "saldo"
 version.workspace = true
 edition.workspace = true
+rust-version.workspace = true
 
 [dependencies]
-flate2 = "1.0.35"
+flate2.workspace = true
 hashbrown.workspace = true
 log = { workspace = true }
 miette.workspace = true

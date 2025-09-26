@@ -10,7 +10,9 @@ members = [
 
 [workspace.package]
 version = "0.1.0"
-edition = "2021"
+edition = "2024"
+rust-version = "1.85.1"
+
 
 [workspace.dependencies]
 # local crates
@@ -21,6 +23,7 @@ wsd-application = { path = "crates/wsd-application" }
 
 # external crates
 eyre = "0.6.12"
+flate2 = "1.0.35"
 hashbrown = "0.15.2"
 insta = "1.41.1"
 log = "0.4.22"
